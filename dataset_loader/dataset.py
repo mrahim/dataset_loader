@@ -523,18 +523,18 @@ def load_adni_masks():
     """
     BASE_DIR = _get_data_base_dir('features/masks')
 
-    return Bunch(mask_pet=os.path.join(BASE_DIR, 'mask_pet.nii.gz'),
-                 mask_fmri=os.path.join(BASE_DIR, 'mask_fmri.nii.gz'),
-                 mask_pet_longitudinal=os.path.join(BASE_DIR,
-                                                    'mask_longitudinal_fdg_pet'
-                                                    '.nii.gz'),
-                 mask_petmr=os.path.join(BASE_DIR, 'mask_petmr.nii.gz'),
-                 mask_petmr_longitudinal=os.path.join(BASE_DIR,
-                                                      'mask_longitudinal_petmr'
-                                                      '.nii.gz'),
-                 mask_fmri_longitudinal=os.path.join(BASE_DIR,
-                                                     'mask_longitudinal_fmri'
-                                                     '.nii.gz'))
+    return Bunch(pet=os.path.join(BASE_DIR, 'mask_pet.nii.gz'),
+                 fmri=os.path.join(BASE_DIR, 'mask_fmri.nii.gz'),
+                 pet_longitudinal=os.path.join(BASE_DIR,
+                                               'mask_longitudinal_fdg_pet'
+                                               '.nii.gz'),
+                 petmr=os.path.join(BASE_DIR, 'mask_petmr.nii.gz'),
+                 petmr_longitudinal=os.path.join(BASE_DIR,
+                                                 'mask_longitudinal_petmr'
+                                                 '.nii.gz'),
+                 fmri_longitudinal=os.path.join(BASE_DIR,
+                                                'mask_longitudinal_fmri'
+                                                '.nii.gz'))
 
 
 def load_atlas(atlas_name):
