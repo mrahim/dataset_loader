@@ -827,6 +827,54 @@ def get_scores_adnidod(subjects):
     return df
 
 
+def get_ptsd_adnidod(subjects):
+    # csv files
+    BASE_DIR = _get_data_base_dir('ADNIDOD_csv')
+
+    # meta-data
+    caps_curr = pd.read_csv(os.path.join(BASE_DIR, 'CAPSLIFE.csv'))
+    caps_life = pd.read_csv(os.path.join(BASE_DIR, 'CAPSCURR.csv'))
+
+    def get_caps(subj_id, score, score_file, ptid='SCRNO'):
+        m = score_file[score_file[ptid] == int(subj_id)][score].dropna().values
+        if len(m) > 0:
+            m[m < 0] = 0
+            return np.median(m)
+        else:
+            return 0.
+
+    def get_ptsd(caps_curr, caps_life, threshold=45):
+        # 0: normal, 1: ptsd, 2: past ptsd
+        if caps_curr >= threshold:
+            if caps_life >= threshold:
+                # ptsd
+                ptsd_status = 1
+            else:
+                # aberrant
+                ptsd_status = 0
+        else:
+            if caps_life >= threshold:
+                # ptsd in the past
+                ptsd_status = 2
+            else:
+                # normal
+                ptsd_status = 0
+        return ptsd_status
+
+    df = {}
+    keys = {'caps_life', 'caps_curr'}
+    scores = ['CAPSSCORE', 'CAPSSCORE']
+    score_files = [caps_life, caps_curr]
+
+    for k, s, sf in zip(keys, scores, score_files):
+        sc = [get_caps(subj, s, sf) for subj in subjects]
+        df[k] = np.array(sc)
+    ptsd = [get_ptsd(cc, cl)
+            for cc, cl in zip(df['caps_curr'], df['caps_life'])]
+    df['dx_group'] = np.array(ptsd)
+    return df
+
+
 def load_adnidod_rs_fmri():
     """loader for adnidod rs fmri
     """
@@ -839,6 +887,7 @@ def load_adnidod_rs_fmri():
                      subject_paths)
     func_files = np.array(func_files)
     scores = get_scores_adnidod(subjects)
+    ptsd = get_ptsd_adnidod(subjects)
     return Bunch(func=func_files,
                  subjects=subjects,
                  npiq=scores['npiq'],
@@ -850,7 +899,8 @@ def load_adnidod_rs_fmri():
                  limm=scores['limm'],
                  adas1=scores['adas1'],
                  adas2=scores['adas2'],
-                 gdscale=scores['gdscale'],)
+                 gdscale=scores['gdscale'],
+                 ptsd=ptsd,)
 
 
 def load_adnidod_av45_pet():
