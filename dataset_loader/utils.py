@@ -414,7 +414,7 @@ def StratifiedSubjectShuffleSplit(dataset, groups, n_iter=100, test_size=.3,
     y = dx_unique_values
 
     # generate folds stratified on dx
-    sss = StratifiedShuffleSplit(y, n_iter=n_iter, test_size=test_size,
+    sss = StratifiedShuffleSplit(n_splits=n_iter, test_size=test_size,
                                  random_state=random_state)
     ssss = []
     for tr, ts in sss:
@@ -451,11 +451,12 @@ def SubjectShuffleSplit(dataset, groups, n_iter=100,
     subjects_unique = np.unique(subjects)
 
     n = len(subjects_unique)
-    ss = ShuffleSplit(n, n_iter=n_iter,
+    X = np.empty((n, n))
+    ss = ShuffleSplit(n_splits=n_iter,
                       test_size=test_size, random_state=random_state)
 
     subj_ss = []
-    for train, test in ss:
+    for train, test in ss.split(X):
         train_get = np.array([], dtype=int)
         for subj in subjects_unique[train]:
             subj_ind = np.where(subjects == subj)
@@ -477,7 +478,7 @@ def SubjectSplit(dataset, n_iter=100, test_size=.3, random_state=42):
     subjects_unique = np.unique(subjects)
 
     n = len(subjects_unique)
-    ss = ShuffleSplit(n, n_iter=n_iter,
+    ss = ShuffleSplit(n_splits=n_iter,
                       test_size=test_size, random_state=random_state)
 
     subj_ss = []
@@ -526,7 +527,7 @@ def _get_subjects_splits(imgs, subjects, dx_group, groups, n_iter=100,
     """
     X, y, idx = _get_classification_data(imgs, dx_group, groups,
                                          return_idx=True)
-    sss = StratifiedShuffleSplit(y, n_iter=n_iter, test_size=test_size,
+    sss = StratifiedShuffleSplit(n_splits=100, test_size=test_size,
                                  random_state=random_state)
     return X, y, idx, sss
 
