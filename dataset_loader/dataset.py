@@ -4,12 +4,13 @@ import pandas as pd
 from datetime import date, datetime
 from joblib import Memory
 from sklearn.datasets.base import Bunch
-from utils import (_get_data_base_dir, _rid_to_ptid, _get_dx,
-                   _get_cache_base_dir, _glob_subject_img, _ptid_to_rid,
-                   _get_group_indices, _get_subjects_and_description,
-                   _get_vcodes, _get_dob, _get_gender, _get_mmse,
-                   _get_cdr, _get_gdscale, _get_faq, _get_npiq,
-                   _get_adas, _get_nss, _get_neurobat)
+from dataset_loader.utils import (_get_data_base_dir, _rid_to_ptid, _get_dx,
+                                  _get_cache_base_dir, _glob_subject_img,
+                                  _ptid_to_rid, _get_group_indices,
+                                  _get_subjects_and_description, _get_vcodes,
+                                  _get_dob, _get_gender, _get_mmse, _get_cdr,
+                                  _get_gdscale, _get_faq, _get_npiq,
+                                  _get_adas, _get_nss, _get_neurobat)
 
 
 DX_LIST = np.array(['None',
@@ -210,27 +211,29 @@ def load_adni_longitudinal_rs_fmri(dirname='ADNI_longitudinal_rs_fmri',
     cache_dir = os.path.join(CACHE_DIR, 'joblib', 'load_data_cache')
     if not os.path.isdir(cache_dir):
         os.makedirs(cache_dir)
-    memory = Memory(cachedir=cache_dir, verbose=0)
+    # memory = Memory(cachedir=cache_dir, verbose=0)
 
-    def _get_ridsfmri(subjects):
-        return map(lambda s: _ptid_to_rid(s, roster), subjects)
-    rids = np.array(memory.cache(_get_ridsfmri)(subjects))
-
-    def _get_examdatesfmri(rids):
-        return map(lambda i: _get_dx(rids[i],
-                                     dx, exams[i],
-                                     viscode=None,
-                                     return_code=True), range(len(rids)))
-    exam_dates = np.array(memory.cache(_get_examdatesfmri)(rids))
-
-    def _get_viscodesfmri(rids):
-        return map(lambda i: _get_vcodes(rids[i], str(exam_dates[i]), dx),
-                   range(len(rids)))
-    viscodes = np.array(memory.cache(_get_viscodesfmri)(rids))
-    vcodes, vcodes2 = viscodes[:, 0], viscodes[:, 1]
-
-    return Bunch(func=func_files, dx_group=dx_group, exam_codes=vcodes,
-                 exam_dates=exam_dates, exam_codes2=vcodes2,
+    # def _get_ridsfmri(subjects):
+    #     return map(lambda s: _ptid_to_rid(s, roster), subjects)
+    # rids = np.array(memory.cache(_get_ridsfmri)(subjects))
+    #
+    # def _get_examdatesfmri(rids):
+    #     return map(lambda i: _get_dx(rids[i],
+    #                                  dx, exams[i],
+    #                                  viscode=None,
+    #                                  return_code=True), range(len(rids)))
+    # exam_dates = np.array(memory.cache(_get_examdatesfmri)(rids))
+    #
+    # def _get_viscodesfmri(rids):
+    #     return map(lambda i: _get_vcodes(rids[i], str(exam_dates[i]), dx),
+    #                range(len(rids)))
+    # viscodes = np.array(memory.cache(_get_viscodesfmri)(rids))
+    # vcodes, vcodes2 = viscodes[:, 0], viscodes[:, 1]
+    #
+    # return Bunch(func=func_files, dx_group=dx_group, exam_codes=vcodes,
+    #              exam_dates=exam_dates, exam_codes2=vcodes2,
+    #              subjects=subjects, images=images)
+    return Bunch(func=func_files, dx_group=dx_group,
                  subjects=subjects, images=images)
 
 

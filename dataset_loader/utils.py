@@ -43,7 +43,7 @@ def _get_subjects_and_description(base_dir,
         raise OSError('%s not found ...' % fname)
     excluded_subjects = []
     if os.stat(fname).st_size > 0:
-        excluded_subjects = np.loadtxt(fname, dtype=str)
+        excluded_subjects = np.loadtxt(fname, dtype=bytes).astype(str)
 
     fname = os.path.join(BASE_DIR, description_csv)
     if not os.path.isfile(fname):
@@ -51,8 +51,11 @@ def _get_subjects_and_description(base_dir,
     description = pd.read_csv(fname)
 
     # exclude bad QC subjects
-    excluded_paths = np.array(map(lambda x: os.path.join(BASE_DIR, x),
-                                  excluded_subjects))
+    excluded_subjects = list(excluded_subjects)
+
+    excluded_paths = np.array([os.path.join(BASE_DIR, x)
+                               for x in excluded_subjects])
+
     subject_paths = np.setdiff1d(subject_paths, excluded_paths)
 
     # get subject_id
@@ -332,9 +335,9 @@ def _get_dob(rid, demog):
     yy = demog[demog.RID == rid]['PTDOBYY'].dropna().values
     mm = demog[demog.RID == rid]['PTDOBMM'].dropna().values
     if len(yy) > 0 and len(mm) > 0:
-        return date(int(yy[0]), int(mm[0]), 01)
+        return date(int(yy[0]), int(mm[0]), 1)
     else:
-        return date(1900, 01, 01)
+        return date(1900, 1, 1)
 
 
 def _get_gender(rid, demog):
