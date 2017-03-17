@@ -204,37 +204,36 @@ def load_adni_longitudinal_rs_fmri(dirname='ADNI_longitudinal_rs_fmri',
     dx_group = np.array(df['DX_Group'])
     subjects = np.array(df['Subject_ID'])
     exams = np.array(df['EXAM_DATE'])
-    exams = map(lambda e: date(int(e[:4]), int(e[5:7]), int(e[8:])), exams)
+    exams = [date(int(e[:4]), int(e[5:7]), int(e[8:])) for e in exams]
 
     # caching dataframe extraction functions
     CACHE_DIR = _get_cache_base_dir()
     cache_dir = os.path.join(CACHE_DIR, 'joblib', 'load_data_cache')
     if not os.path.isdir(cache_dir):
         os.makedirs(cache_dir)
-    # memory = Memory(cachedir=cache_dir, verbose=0)
+    memory = Memory(cachedir=cache_dir, verbose=0)
 
-    # def _get_ridsfmri(subjects):
-    #     return map(lambda s: _ptid_to_rid(s, roster), subjects)
-    # rids = np.array(memory.cache(_get_ridsfmri)(subjects))
-    #
-    # def _get_examdatesfmri(rids):
-    #     return map(lambda i: _get_dx(rids[i],
-    #                                  dx, exams[i],
-    #                                  viscode=None,
-    #                                  return_code=True), range(len(rids)))
-    # exam_dates = np.array(memory.cache(_get_examdatesfmri)(rids))
-    #
-    # def _get_viscodesfmri(rids):
-    #     return map(lambda i: _get_vcodes(rids[i], str(exam_dates[i]), dx),
-    #                range(len(rids)))
-    # viscodes = np.array(memory.cache(_get_viscodesfmri)(rids))
-    # vcodes, vcodes2 = viscodes[:, 0], viscodes[:, 1]
-    #
-    # return Bunch(func=func_files, dx_group=dx_group, exam_codes=vcodes,
-    #              exam_dates=exam_dates, exam_codes2=vcodes2,
-    #              subjects=subjects, images=images)
-    return Bunch(func=func_files, dx_group=dx_group,
+    def _get_ridsfmri(subjects):
+        return [_ptid_to_rid(s, roster) for s in subjects]
+    rids = np.array(memory.cache(_get_ridsfmri)(subjects))
+
+    def _get_examdatesfmri(rids):
+        return [_get_dx(rids[i], dx, exams[i], viscode=None, return_code=True)
+                for i in range(len(rids))]
+
+    exam_dates = np.array(memory.cache(_get_examdatesfmri)(rids))
+
+    def _get_viscodesfmri(rids):
+        return [_get_vcodes(rids[i], str(exam_dates[i]), dx)
+                for i in range(len(rids))]
+    viscodes = np.array(memory.cache(_get_viscodesfmri)(rids))
+    vcodes, vcodes2 = viscodes[:, 0], viscodes[:, 1]
+
+    return Bunch(func=func_files, dx_group=dx_group, exam_codes=vcodes,
+                 exam_dates=exam_dates, exam_codes2=vcodes2,
                  subjects=subjects, images=images)
+    # return Bunch(func=func_files, dx_group=dx_group,
+    #              subjects=subjects, images=images)
 
 
 def load_adni_rs_fmri():
@@ -648,11 +647,11 @@ def get_demographics(subjects, exam_dates=None):
     memory = Memory(cachedir=cache_dir, verbose=0)
 
     def _get_ridsdemo(subjects):
-        return map(lambda s: _ptid_to_rid(s, roster), subjects)
+        return [_ptid_to_rid(s, roster) for s in subjects]
     rids = np.array(memory.cache(_get_ridsdemo)(subjects))
 
     def _get_dobdemo(rids):
-        return map(lambda r: _get_dob(r, demog), rids)
+        return [_get_dob(r, demog) for r in rids]
     dobs = np.array(memory.cache(_get_dobdemo)(rids))
     if exam_dates is not None:
         # compute age
@@ -660,42 +659,42 @@ def get_demographics(subjects, exam_dates=None):
                for e, d in zip(exam_dates, dobs)]
 
     def _get_genderdemo(rids):
-        return map(lambda r: _get_gender(r, demog), rids)
+        return [_get_gender(r, demog) for r in rids]
     genders = np.array(memory.cache(_get_genderdemo)(rids)).astype(int)
 
     def _get_mmsedemo(rids):
-        return map(lambda r: _get_mmse(r, mmse), rids)
+        return [_get_mmse(r, mmse) for r in rids]
     mmses = np.array(memory.cache(_get_mmsedemo)(rids))
 
     def _get_cdrdemo(rids):
-        return map(lambda r: _get_cdr(r, cdr), rids)
+        return [_get_cdr(r, cdr) for r in rids]
     cdrs = np.array(memory.cache(_get_cdrdemo)(rids))
 
     def _getgdscaledemo(rids):
-        return map(lambda r: _get_gdscale(r, gdscale), rids)
+        return [_get_gdscale(r, gdscale) for r in rids]
     gds = np.array(memory.cache(_getgdscaledemo)(rids))
 
     def _getfaqdemo(rids):
-        return map(lambda r: _get_faq(r, faq), rids)
+        return [_get_faq(r, faq) for r in rids]
     faqs = np.array(memory.cache(_getfaqdemo)(rids))
 
     def _getnpiqdemo(rids):
-        return map(lambda r: _get_npiq(r, npiq), rids)
+        return [_get_npiq(r, npiq) for r in rids]
     npiqs = np.array(memory.cache(_getnpiqdemo)(rids))
 
     def _getadasdemo(rids):
-        return map(lambda r: _get_adas(r, adas1, adas2), rids)
+        return [_get_adas(r, adas1, adas2) for r in rids]
     adas = np.array(memory.cache(_getadasdemo)(rids))
 
     def _getnssdemo(rids):
-        return (map(lambda r: _get_nss(r, nss, mode=1), rids),
-                map(lambda r: _get_nss(r, nss, mode=2), rids))
+        return ([_get_nss(r, nss, mode=1) for r in rids],
+                [_get_nss(r, nss, mode=2) for r in rids])
     nss1, nss2 = memory.cache(_getnssdemo)(rids)
     nss1, nss2 = np.array(nss1), np.array(nss2)
 
     def _getneurobatdemo(rids):
-        return (map(lambda r: _get_neurobat(r, neurobat, mode=1), rids),
-                map(lambda r: _get_neurobat(r, neurobat, mode=2), rids))
+        return ([_get_neurobat(r, neurobat, mode=1) for r in rids],
+                [_get_neurobat(r, neurobat, mode=2) for r in rids])
     nb1, nb2 = memory.cache(_getneurobatdemo)(rids)
     nb1, nb2 = np.array(nb1), np.array(nb2)
 
