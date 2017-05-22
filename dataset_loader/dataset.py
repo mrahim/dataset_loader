@@ -192,8 +192,8 @@ def load_adni_longitudinal_rs_fmri(dirname='ADNI_longitudinal_rs_fmri',
 
     # get motion files
     # motions = None
-    # motions = map(lambda x: _glob_subject_img(x, suffix='func/' + 'rp_*.txt',
-    # first_img=True), subject_paths)
+    motions = list(map(lambda x: _glob_subject_img(
+        x, suffix='func/' + 'rp_*.txt', first_img=True), subject_paths))
 
     # get phenotype from csv
     dx = pd.read_csv(os.path.join(_get_data_base_dir('ADNI_csv'),
@@ -232,6 +232,7 @@ def load_adni_longitudinal_rs_fmri(dirname='ADNI_longitudinal_rs_fmri',
 
     return Bunch(func=func_files, dx_group=dx_group, exam_codes=vcodes,
                  exam_dates=exam_dates, exam_codes2=vcodes2,
+                 motion=motions,
                  subjects=subjects, images=images)
     # return Bunch(func=func_files, dx_group=dx_group,
     #              subjects=subjects, images=images)
