@@ -61,7 +61,7 @@ def load_adni_longitudinal_mmse_score():
 
     def _getdxmmse(rids, vcodes2):
         return map(lambda x, y: DX_LIST[_get_dx(x, dx, viscode=y)],
-                   rids, vcodes2)
+                   rids, vcodes2).tolist()
 
     # get diagnosis
     dx_group = memory.cache(_getdxmmse)(rids, vcodes2)
@@ -103,13 +103,13 @@ def load_adni_longitudinal_csf_biomarker():
     memory = Memory(cachedir=cache_dir, verbose=0)
 
     def _getptidscsf(rids):
-        return map(lambda x: _rid_to_ptid(x, roster), rids)
+        return map(lambda x: _rid_to_ptid(x, roster), rids).tolist()
     ptids = memory.cache(_getptidscsf)(rids)
 
     # get diagnosis
     def _getdxcsf(rids, vcodes):
         return map(lambda x, y: DX_LIST[_get_dx(x, dx, viscode=y)],
-                   rids, vcodes)
+                   rids, vcodes).tolist()
     dx_group = memory.cache(_getdxcsf)(rids, vcodes)
 
     return Bunch(dx_group=np.array(dx_group), subjects=np.array(ptids),
@@ -153,12 +153,12 @@ def load_adni_longitudinal_hippocampus_volume():
     exams = fs['EXAMDATE'].values[idx_num]
     vcodes = fs['VISCODE'].values[idx_num]
     vcodes2 = fs['VISCODE2'].values[idx_num]
-    exams = map(lambda e: date(int(e[:4]), int(e[5:7]), int(e[8:])), exams)
+    exams = map(lambda e: date(int(e[:4]), int(e[5:7]), int(e[8:])), exams).tolist()
     exams = np.array(exams)
 
     # extract diagnosis
     def _getdxhippo(rids, exams):
-        return np.array(map(_get_dx, rids, [dx]*len(rids), exams))
+        return np.array(map(_get_dx, rids, [dx]*len(rids), exams).tolist())
     dx_ind = memory.cache(_getdxhippo)(rids, exams)
     dx_group = DX_LIST[dx_ind]
 
@@ -186,7 +186,7 @@ def load_adni_longitudinal_rs_fmri(dirname='ADNI_longitudinal_rs_fmri',
     # get func files
     func_files = map(lambda x: _glob_subject_img(x, suffix='func/' + prefix,
                                                  first_img=True),
-                     subject_paths)
+                     subject_paths).tolist()
     func_files = np.array(func_files)
 
     # get motion files
@@ -249,7 +249,7 @@ def load_adni_rs_fmri():
     # get func files
     func_files = map(lambda x: _glob_subject_img(x, suffix='func/swr*.nii',
                                                  first_img=True),
-                     subject_paths)
+                     subject_paths).tolist()
 
     # get phenotype from csv
     df = description[description['Subject_ID'].isin(subjects)]
@@ -273,7 +273,7 @@ def load_adni_longitudinal_av45_pet():
     # get pet files
     pet_files = map(lambda x: _glob_subject_img(x, suffix='pet/wr*.nii',
                                                 first_img=False),
-                    subject_paths)
+                    subject_paths).tolist()
     idx = [0]
     pet_files_all = []
     for pet_file in pet_files:
@@ -296,7 +296,7 @@ def load_adni_longitudinal_av45_pet():
     ages = np.array(df['Age'])
 
     exams = np.array(df['Study_Date'])
-    exams = map(lambda e: datetime.strptime(e, '%m/%d/%Y').date(), exams)
+    exams = map(lambda e: datetime.strptime(e, '%m/%d/%Y').date(), exams).tolist()
 
     # caching dataframe extraction functions
     CACHE_DIR = _get_cache_base_dir()
@@ -306,19 +306,19 @@ def load_adni_longitudinal_av45_pet():
     memory = Memory(cachedir=cache_dir, verbose=0)
 
     def _get_ridspet(subjects_all):
-        return map(lambda s: _ptid_to_rid(s, roster), subjects_all)
+        return map(lambda s: _ptid_to_rid(s, roster), subjects_all).tolist()
     rids = memory.cache(_get_ridspet)(subjects_all)
 
     def _get_examdatespet(rids):
         return map(lambda i: _get_dx(rids[i],
                                      dx, exams[i],
                                      viscode=None,
-                                     return_code=True), range(len(rids)))
+                                     return_code=True), range(len(rids))).tolist()
     exam_dates = np.array(memory.cache(_get_examdatespet)(rids))
 
     def _get_viscodespet(rids):
         return map(lambda i: _get_vcodes(rids[i], str(exam_dates[i]), dx),
-                   range(len(rids)))
+                   range(len(rids))).tolist()
     viscodes = np.array(memory.cache(_get_viscodespet)(rids))
     if len(viscodes) > 0:
         vcodes, vcodes2 = viscodes[:, 0], viscodes[:, 1]
@@ -342,7 +342,7 @@ def load_adni_longitudinal_fdg_pet():
     # get pet files
     pet_files = map(lambda x: _glob_subject_img(x, suffix='pet/wr*.nii',
                                                 first_img=False),
-                    subject_paths)
+                    subject_paths).tolist()
     idx = [0]
     pet_files_all = []
     for pet_file in pet_files:
@@ -366,7 +366,7 @@ def load_adni_longitudinal_fdg_pet():
     ages = np.array(df['Age'])
 
     exams = np.array(df['Exam_Date'])
-    exams = map(lambda e: date(int(e[:4]), int(e[5:7]), int(e[8:])), exams)
+    exams = map(lambda e: date(int(e[:4]), int(e[5:7]), int(e[8:])), exams).tolist()
 
     # caching dataframe extraction functions
     CACHE_DIR = _get_cache_base_dir()
@@ -376,19 +376,19 @@ def load_adni_longitudinal_fdg_pet():
     memory = Memory(cachedir=cache_dir, verbose=0)
 
     def _get_ridspet(subjects_all):
-        return map(lambda s: _ptid_to_rid(s, roster), subjects_all)
+        return map(lambda s: _ptid_to_rid(s, roster), subjects_all).tolist()
     rids = memory.cache(_get_ridspet)(subjects_all)
 
     def _get_examdatespet(rids):
         return map(lambda i: _get_dx(rids[i],
                                      dx, exams[i],
                                      viscode=None,
-                                     return_code=True), range(len(rids)))
+                                     return_code=True), range(len(rids))).tolist()
     exam_dates = np.array(memory.cache(_get_examdatespet)(rids))
 
     def _get_viscodespet(rids):
         return map(lambda i: _get_vcodes(rids[i], str(exam_dates[i]), dx),
-                   range(len(rids)))
+                   range(len(rids))).tolist()
     viscodes = np.array(memory.cache(_get_viscodespet)(rids))
     vcodes, vcodes2 = viscodes[:, 0], viscodes[:, 1]
 
@@ -409,7 +409,7 @@ def load_adni_baseline_rs_fmri():
     # get func files
     func_files = map(lambda x: _glob_subject_img(x, suffix='func/wr*.nii',
                                                  first_img=True),
-                     subject_paths)
+                     subject_paths).tolist()
 
     # get phenotype from csv
     df = description[description['Subject_ID'].isin(subjects)]
@@ -449,7 +449,7 @@ def load_adni_fdg_pet():
 
     # get pet files
     pet_files = map(lambda x: _glob_subject_img(x, suffix='pet/w*.nii',
-                                                first_img=True), subject_paths)
+                                                first_img=True), subject_paths).tolist()
     # get phenotype from csv
     df = description[description['Subject_ID'].isin(subjects)]
     dx_group = np.array(df['DX_Group'])
@@ -727,13 +727,13 @@ def load_longitudinal_dataset(modality='pet', nb_imgs_min=3, nb_imgs_max=5):
         dataset = load_adni_longitudinal_csf_biomarker()
         # transform data as list of arrays
         dataset['csf'] = np.array(map(lambda C: '_'.join([str(c) for c in C]),
-                                  dataset.csf))
+                                  dataset.csf).tolist())
         img_key = 'csf'
     elif modality == 'hippo':
         dataset = load_adni_longitudinal_hippocampus_volume()
         # transform data as list of arrays
         dataset['hipp'] = np.array(map(lambda H: '_'.join([str(h) for h in H]),
-                                   dataset.hipp))
+                                   dataset.hipp).tolist())
         img_key = 'hipp'
     else:
         raise ValueError('%s not found !' % modality)
@@ -759,10 +759,10 @@ def load_longitudinal_dataset(modality='pet', nb_imgs_min=3, nb_imgs_max=5):
                              for s in subjects])
     # csf and hipp cases
     if img_key in ['hipp', 'csf']:
-        imgs = np.array(map(lambda img: [i.split('_') for i in img], imgs))
+        imgs = np.array(map(lambda img: [i.split('_') for i in img], imgs).tolist())
         imgs_baseline = [img.split('_') for img in imgs_baseline]
         imgs_baseline = np.array(map(lambda imgs: [np.float(i) for i in imgs],
-                                     imgs_baseline))
+                                     imgs_baseline).tolist())
 
     # acquisition and exam dates / codes of the subjects
     if 'exam_dates' in dataset.keys():
@@ -886,7 +886,7 @@ def load_adnidod_rs_fmri():
     # get func files
     func_files = map(lambda x: _glob_subject_img(x, suffix='func/' + 'wr*',
                                                  first_img=True),
-                     subject_paths)
+                     subject_paths).tolist()
     func_files = np.array(func_files)
     scores = get_scores_adnidod(subjects)
     ptsd = get_ptsd_adnidod(subjects)
@@ -914,7 +914,7 @@ def load_adnidod_av45_pet():
     # get func files
     func_files = map(lambda x: _glob_subject_img(x, suffix='pet/' + 'wr*.nii',
                                                  first_img=True),
-                     subject_paths)
+                     subject_paths).tolist()
     pet = np.array(func_files)
     scores = get_scores_adnidod(subjects)
     return Bunch(pet=pet,
