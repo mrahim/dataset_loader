@@ -884,8 +884,7 @@ def load_adnidod_rs_fmri():
     subjects = np.array(subjects)
     # get func files
     func_files = list(map(lambda x: _glob_subject_img(
-        x, suffix='func/' + 'wr*', first_img=True),
-                     subject_paths).tolist()
+        x, suffix='func/' + 'wr*', first_img=True), subject_paths))
     func_files = np.array(func_files)
     scores = get_scores_adnidod(subjects)
     ptsd = get_ptsd_adnidod(subjects)
